@@ -8,8 +8,8 @@ import urllib.parse as urlparse
 
 # Load environment variables from .env file
 load_dotenv()
-api_key = os.getenv("api_key")
-digital_signature = os.getenv("digital_signature")
+api_key = os.getenv("API_KEY")
+digital_signature = os.getenv("SECRET")
 
 def sign_url(input_url=None, secret=None):
     """ Sign a request URL with a URL signing secret.
@@ -71,7 +71,7 @@ def fetch_image(lat, lon, heading, fov, api_key=api_key, secret_key=digital_sign
 def save_image(image_content, filename):
     """Saves the image content to a file"""
     # Directory to save images
-    directory = './data/images/'
+    directory = './images/'
     # Create directory if it doesn't exist
     if not os.path.exists(directory):
         os.makedirs(directory, exist_ok=True)
