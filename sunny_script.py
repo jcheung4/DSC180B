@@ -42,19 +42,19 @@ def gen_url(params, input_url=pic_base):
 def get_metal(outpath, structure_json):
     for i,st in enumerate(structure_json):
         for j,pic in enumerate(st):
-            for f in [20,60,90]:
+            for f in [30,70,100]:
                 pic_params = {'key': API_KEY,
                         'location': pic['loc'],
-                        'size': "640x640",
+                        'size': "960x960",
                         'heading':pic['heading'],
-                        'pitch':10,
+                        'pitch':5,
                         'fov':f
                         }
                 if SECRET:
                     pic_response = requests.get(sign_url(input_url=gen_url(pic_params)))
                 else:
                     pic_response = requests.get(input_url=gen_url(pic_params))
-                with open(os.path.join(outpath,'Sunny_metal_'+str(f)+'_'+str(i)+'_'+str(j)+'.jpg'), 'wb') as file:
+                with open(os.path.join(outpath,'Sunny_metal_'+str(i)+'_'+str(j)+'_'+str(f)+'.jpg'), 'wb') as file:
                     file.write(pic_response.content)
 
 
@@ -63,19 +63,19 @@ def get_metal(outpath, structure_json):
 def get_wooden(outpath, structure_json):
     for i,st in enumerate(structure_json):
         for j,pic in enumerate(st):
-            for f in [20,60,90]:
+            for f in [30,70,100]:
                 pic_params = {'key': API_KEY,
                         'location': pic['loc'],
-                        'size': "640x640",
+                        'size': "960x960",
                         'heading':pic['heading'],
-                        'pitch':10,
+                        'pitch':5,
                         'fov':f
                         }
                 if SECRET:
                     pic_response = requests.get(sign_url(input_url=gen_url(pic_params)))
                 else:
                     pic_response = requests.get(input_url=gen_url(pic_params))
-                with open(os.path.join(outpath,'Sunny_wooden_'+str(f)+'_'+str(i)+'_'+str(j)+'.jpg'), 'wb') as file:
+                with open(os.path.join(outpath,'Sunny_wooden_'+str(i)+'_'+str(j)+'_'+str(f)+'.jpg'), 'wb') as file:
                     file.write(pic_response.content)
 # %%
 def collect_struct_json(jsonpath, outpath):
@@ -88,6 +88,6 @@ def collect_struct_json(jsonpath, outpath):
     get_wooden(outpath, WD)
 # %%
 # sample code :
-#collect_struct_json('sunny_structure_coordinates.json','images/')
+collect_struct_json('sunny_structure_coordinates.json','images/')
 
 # %%
