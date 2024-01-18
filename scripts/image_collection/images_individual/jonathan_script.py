@@ -92,3 +92,5 @@ def get_images(coord_json_file, outpath):
                 save_image_file(img['latitude'][i], img['longitude'][i], img['heading'][i], img['pitch'][i], fov, secret, api_key, img_name, outpath)
     
 
+if __name__ == "__main__":
+    get_images("../../data/jonathan_structures.json", "../../data/images/")

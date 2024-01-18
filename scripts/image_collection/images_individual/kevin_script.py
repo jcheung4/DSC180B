@@ -72,7 +72,8 @@ def get_image(lat, long, size = '640x400', fov = 90, heading = 0, pitch = 0, sho
                 image_file.write(response.content)
     else:
         print(f"Error: {response.status_code} - Failed to fetch Street View image.")
-        
+
+"""
 # %%
 with open('kevin_structures.json', 'r') as file:
     all_structures = json.load(file)
@@ -99,3 +100,27 @@ for name, struc in all_structures.items():
                 save_path = os.path.join(parent_dir, f'kevin_{name}_{i}_{index}.jpg')
             )
 # %%
+"""
+
+def kevin_create_images(data_file='', output_path=''):
+    with open(data_file, 'r') as file:
+        all_structures = json.load(file)
+        
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+            
+        for name, struc in all_structures.items():
+            for i in range(len(struc['lat'])):
+                for index, zoom in enumerate([5, 10, 15]):
+                    get_image(
+                        lat=struc['lat'][i],
+                        long=struc['long'][i],
+                        fov=struc['fov'] + zoom,
+                        heading=struc['heading'][i],
+                        pitch=struc['pitch'],
+                        show=False,
+                        save_path=os.path.join(output_path, f'kevin_images_{name}_{i}_{index}.jpg')
+                    )
+
+if __name__ == "__main__":
+    kevin_create_images(data_file='../../data/kevin_structures.json', output_path='../../data/images/')
