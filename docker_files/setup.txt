@@ -1,0 +1,3 @@
+# GENERAL STEPS TO UP POSTGRESQL DOCKER CONTAINER
+1. docker build -t dsc180b-image .
+2. docker run -p 5432:5432 --name dsc180b-container -d dsc180b-image
