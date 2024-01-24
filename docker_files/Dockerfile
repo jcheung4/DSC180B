@@ -8,6 +8,3 @@ ENV POSTGRES_PASSWORD dsc180b
 
 # Copy SQL script to initialize the database and table
 COPY init.sql /docker-entrypoint-initdb.d/
-
-# Expose the PostgreSQL port
-EXPOSE 5432

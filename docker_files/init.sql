@@ -1,4 +1,3 @@
--- Switch to the newly created database
 \c mydatabase;
 
 CREATE TABLE poles (

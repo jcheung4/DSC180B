@@ -1,3 +1,6 @@
 # GENERAL STEPS TO UP POSTGRESQL DOCKER CONTAINER
-1. docker build -t dsc180b-image .
-2. docker run -p 5432:5432 --name dsc180b-container -d dsc180b-image
+1. Run `lsof -i :5432` to see if anything is currently occupying that port.
+- If so, run `sudo kill [pid]` to get rid of it.
+    - I found that my local postgres was occupying that port so this might be the case for you
+2. Run `docker build -t dsc180b-image .`
+3. Run `docker run -p 5432:5432 --name dsc180b-container -d dsc180b-image`
