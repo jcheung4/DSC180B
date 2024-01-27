@@ -8,5 +8,7 @@ CREATE TABLE poles (
 );
 
 INSERT INTO poles (latitude, longitude, type) VALUES
-    (32.7455211, -117.0242656, 'Metal'),
-    (32.745515, -117.023937, 'Wooden');
+    (32.8517336, -117.1965509, 'Wooden'),
+    (32.8516457, -117.1961353, 'Wooden'),
+    (32.8515214, -117.1954883, 'Wooden'),
+    (32.8515214, -117.1954883, 'Wooden'),
