@@ -119,7 +119,7 @@ def kevin_create_images(data_file='', output_path=''):
                         heading=struc['heading'][i],
                         pitch=struc['pitch'],
                         show=False,
-                        save_path=os.path.join(output_path, f'kevin_images_{name}_{i}_{index}.jpg')
+                        save_path=os.path.join(output_path, f'kevin_{name}_{i}_{index}.jpg')
                     )
 
 if __name__ == "__main__":
