@@ -8,6 +8,7 @@ import hmac
 import urllib.parse as urlparse
 import hashlib
 import numpy as np
+import imageio
 
 load_dotenv()
 
@@ -39,12 +40,13 @@ def gen_url(params, input_url=pic_base):
         out = out+"&"+str(i)+"="+str(params[i])
     return out
 
-def get_pic(loc='',size='960x960',heading =0,pitch=0):
-    pic_params = {'key': API_KEY,
+def get_pic(loc='',size='960x960',heading =0,pitch=5):
+    pic_params = {
+        'key': API_KEY,
         'location': loc,
         'size': size,
         'heading':heading,
-        'pitch':5,
+        'pitch':pitch,
     }
     if SECRET:
         pic_response = requests.get(sign_url(input_url=gen_url(pic_params)))
@@ -75,6 +77,7 @@ def unique_coordinates(start,ang,length,interval = 0.00005):
 
 #ang: the angle of the road in radian
 #inc: the anticipated heading compared to the road direction
+#(0 means it will just look straight down the road)
 def ang_add(ang, inc):
     ang_deg = (ang*180/np.pi)
     if ang_deg > 90:
@@ -89,7 +92,7 @@ def ang_add(ang, inc):
     return out
 
 #loc1 and loc2 should be string
-def traverse_collect_images(loc1,loc2):
+def traverse_collect_images(loc1,loc2,dir='../temp/'):
     one = loc1.split(',')
     one[0] = float(one[0])
     one[1] = float(one[1])
@@ -107,13 +110,37 @@ def traverse_collect_images(loc1,loc2):
     for i,c in enumerate(coors):
         for h in leftside:
             img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h))
-            with open('../temp/test'+str(i)+'_'+str(h)+'.jpg', 'wb') as file:
+            with open(os.path.join(dir, 'test'+str(i)+'_'+str(h)+'.jpg'), 'wb') as file:
                 file.write(img.content)
         for h in rightside:
             img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h))
-            with open('../temp/test'+str(i)+'_'+str(h)+'.jpg', 'wb') as file:
+            with open(os.path.join(dir, 'test'+str(i)+'_'+str(h)+'.jpg'), 'wb') as file:
                 file.write(img.content)
 
+def traverse_straight(loc1,loc2,dir='../temp/'):
+    one = loc1.split(',')
+    one[0] = float(one[0])
+    one[1] = float(one[1])
+    two = loc2.split(',')
+    two[0] = float(two[0])
+    two[1] = float(two[1])
+    #first number indicates y coordinate and second number indicate x coordinate
+    ygap = two[0] - one[0]
+    xgap = two[1] - one[1]
+    length = (xgap**2+ygap**2)**0.5
+    ang = np.arctan2(ygap,xgap)
+    coors = unique_coordinates(one,ang,length)
+    for i,c in enumerate(coors):
+        img = get_pic(loc = float_to_co(c),heading = ang_add(ang,0),size='2560x2560')
+        with open(os.path.join(dir, 'test'+str(i)+'.jpg'), 'wb') as file:
+            file.write(img.content)
+
+#dir = '../temp/giftest'
+def gif_gen(dir):
+    images = []
+    for f in sorted(os.listdir(dir)):
+        images.append(imageio.imread(os.path.join(dir,f)))
+    imageio.mimsave(os.path.join(dir,'test.gif'), images)
 #sample code, provided loc1, loc2. This just to show the code work. 
 #The heading is set to 0 which to see if the heading is following the road.
 """
@@ -144,4 +171,8 @@ loc1='32.85179322509682,-117.19691677340164'
 loc2='32.8514507286907,-117.19493193834228'
 traverse_collect_images(loc1,loc2)
 """
+# %%
+loc1 = '32.8209644,-117.1861909'
+loc2 = '32.8195283,-117.1861259'
+traverse_straight(loc1,loc2)
 # %%
