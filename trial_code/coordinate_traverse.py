@@ -67,7 +67,7 @@ def unique_coordinates(start,ang,length,interval = 0.00005):
     valid_img = [prev_img]
     for _ in range(int(length/interval)):
         temp = [prev_co[0] + interval*np.sin(ang), prev_co[1] + interval*np.cos(ang)]
-        temp_img = get_pic(loc=float_to_co(temp),size='100x100').content
+        temp_img = get_pic(loc=float_to_co(temp),size='20x20').content
         if temp_img != prev_img:
             valid_co += [temp]
             valid_img += [temp_img]
@@ -135,12 +135,40 @@ def traverse_straight(loc1,loc2,dir='../temp/'):
         with open(os.path.join(dir, 'test'+str(i)+'.jpg'), 'wb') as file:
             file.write(img.content)
 
+def traverse_curves(locs, dir = '../temp/'):
+    idx = 0
+    for i in range(len(locs)-1):
+        loc1 = locs[i]
+        loc2 = locs[i+1]
+        one = loc1.split(',')
+        one[0] = float(one[0])
+        one[1] = float(one[1])
+        two = loc2.split(',')
+        two[0] = float(two[0])
+        two[1] = float(two[1])
+        #first number indicates y coordinate and second number indicate x coordinate
+        ygap = two[0] - one[0]
+        xgap = two[1] - one[1]
+        length = (xgap**2+ygap**2)**0.5
+        ang = np.arctan2(ygap,xgap)
+        coors = unique_coordinates(one,ang,length)
+        for _,c in enumerate(coors):
+            if _ == 0 and idx>0:
+                continue
+            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,0),size='960x960')
+            with open(os.path.join(dir, 'test'+str(idx).zfill(5)+'.jpg'), 'wb') as file:
+                file.write(img.content)
+            idx+=1
+
 #dir = '../temp/giftest'
-def gif_gen(dir):
+def gif_gen(dir,duration = None):
     images = []
     for f in sorted(os.listdir(dir)):
         images.append(imageio.imread(os.path.join(dir,f)))
-    imageio.mimsave(os.path.join(dir,'test.gif'), images)
+    if duration:
+        imageio.mimsave(os.path.join(dir,'test.gif'), images, duration = duration)
+    else:
+        imageio.mimsave(os.path.join(dir,'test.gif'), images)
 #sample code, provided loc1, loc2. This just to show the code work. 
 #The heading is set to 0 which to see if the heading is following the road.
 """
@@ -170,9 +198,20 @@ for i,c in enumerate(coors):
 loc1='32.85179322509682,-117.19691677340164'
 loc2='32.8514507286907,-117.19493193834228'
 traverse_collect_images(loc1,loc2)
-"""
+
 # %%
 loc1 = '32.8209644,-117.1861909'
 loc2 = '32.8195283,-117.1861259'
 traverse_straight(loc1,loc2)
 # %%
+#traversing the curvy part and generating gif
+locs =[
+    '32.8209644,-117.1861909',
+    '32.8195283,-117.1861259',
+    '32.81854015068618,-117.18570029754645'
+]
+traverse_curves(locs)
+
+# %%
+gif_gen('../temp/giftest/fin_gif', duration = 0.08)
+"""
