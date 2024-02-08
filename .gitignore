@@ -3,7 +3,9 @@
 images/*
 temp
 __pycache__
-entire_workflow/models/*
+#!entire_workflow/models/
+#entire_workflow/models/
+#entire_workflow/models/*
 entire_workflow/temp_images
 entire_workflow/temp_bb_images
 entire_workflow/results.txt
