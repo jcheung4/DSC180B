@@ -40,13 +40,14 @@ def gen_url(params, input_url=pic_base):
         out = out+"&"+str(i)+"="+str(params[i])
     return out
 
-def get_pic(loc='',size='960x960',heading=0,pitch=5):
+def get_pic(loc='',size='960x960',heading=0,pitch=5,fov=90):
     pic_params = {
         'key': API_KEY,
         'location': loc,
         'size': size,
         'heading':heading,
         'pitch':pitch,
+        'fov': fov,
     }
     if SECRET:
         pic_response = requests.get(sign_url(input_url=gen_url(pic_params)))
@@ -92,7 +93,7 @@ def ang_add(ang, inc):
     return out
 
 #loc1 and loc2 should be string
-def traverse_collect_images(loc1,loc2,dir='../temp/'):
+def traverse_collect_images(loc1,loc2,dir='../temp/', fov = 90):
     one = loc1.split(',')
     one[0] = float(one[0])
     one[1] = float(one[1])
@@ -116,12 +117,12 @@ def traverse_collect_images(loc1,loc2,dir='../temp/'):
     
     for i,c in enumerate(coors_updated):
         for h in leftside:
-            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h), size = '640x640')
+            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h), size = '640x640', fov = fov)
             img_name = f"left{i}_{h}_{c[0]}_{c[1]}.jpg"
             with open(os.path.join(dir, img_name), 'wb') as file:
                 file.write(img.content)
         for h in rightside:
-            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h), size = '640x640')
+            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h), size = '640x640', fov = fov)
             img_name = f"right{i}_{h}_{c[0]}_{c[1]}.jpg"
             with open(os.path.join(dir, img_name), 'wb') as file:
                 file.write(img.content)
@@ -182,7 +183,7 @@ def gif_gen(dir,duration = None):
 # %%
 loc1 = '32.8209644,-117.1861909'
 loc2 = '32.8195283,-117.1861259'
-#traverse_collect_images(loc1,loc2, './test_2/')
+traverse_collect_images(loc1,loc2, './test_2/', fov = 45),
 
 # %%
 loc1 = '32.6781445,-117.098631'
