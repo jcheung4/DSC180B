@@ -41,7 +41,7 @@ python detr/main.py \
   --coco_path "data" \
   --output_dir "entire_workflow/models" \
   --resume "detr/detr-r50_no-class-head.pth" \
-  --num_classes 3 \
+  --num_classes 2 \
   --epochs 1 \
   --device cuda
 ```
@@ -64,4 +64,7 @@ In order to run the model to identify wooden and metal poles along the streets o
 python pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 ```
 > [!NOTE]
-> Example coordinate pair: `32.8209644,-117.1861909`
+> Example:
+> ```
+> python pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
+> ```
