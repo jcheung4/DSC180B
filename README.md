@@ -4,17 +4,10 @@ The goal of this project is to ensure up-to-date data quality control with SDG&E
 
 ## Data Sources:
 
-# Necessary?
-
 **Training images** are obtained using the [Google Street View Static API](https://developers.google.com/maps/documentation/streetview/overview).
 
-1. The [streetwatch](https://github.com/pdashk/streetwatch) repository outlines how to download all the images into an output folder: `images`.
-2. After running `python scripts/collect_images.py` in streetwatch, move the `images` output folder into the `data` directory of this repository.
+Running `python scripts/image_collection/collect_images.py` will download all the training images into the `images` folder into the `data` directory of this repository.
 
-
-**Image annotations** in COCO json format will be needed for the model to train on. Training and validation annotations should be placed within the `data/annotations` directory and be named `custom_train.json` and `custom_val.json` respectively.
-> [!NOTE]
-> For the streetwatch data specifically, the annotations have already been added in the `data/annotations` directory as the original source is a private Sharepoint within our subject domain.
 
 ## Setup
 
@@ -23,6 +16,40 @@ After cloning repository, navigate to root level and run:
 ```
 conda env create -f environment.yml
 ```
+
+### DETR Model
+You must clone the DETR repository in order to train the model:
+```
+git clone https://github.com/woctezuma/detr.git
+cd detr
+git checkout finetune
+cd ..
+```
+
+### Create Training/Validation Datasets and Prepare files to train model
+After downloading `images` folder into the `data` directory, run:
+```
+python scripts/initialize.py
+```
+This will download the model's "base" and split the data into training/validation sets based on the COCO json annotations.
+
+### Train the Model
+In order to train the model, run the following:
+```
+python detr/main.py \
+  --dataset_file "custom" \
+  --coco_path "data" \
+  --output_dir "entire_workflow/models" \
+  --resume "detr/detr-r50_no-class-head.pth" \
+  --num_classes 3 \
+  --epochs 1 \
+  --device cuda
+```
+The parameters preceded by "--" may be modified accordingly such as the number of epochs to train for.
+> [!IMPORTANT]
+> A GPU is required to timely train the model.
+
+After the model is finished training, output files will be saved to the `entire_workflow/models` folder.
 
 ### PostgreSQL Docker Container
 1. Run `lsof -i :5432` to see if anything is currently occupying that port.
