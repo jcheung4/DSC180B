@@ -42,7 +42,7 @@ python detr/main.py \
   --output_dir "entire_workflow/models" \
   --resume "detr/detr-r50_no-class-head.pth" \
   --num_classes 2 \
-  --epochs 1 \
+  --epochs 10 \
   --device cuda
 ```
 The parameters preceded by "--" may be modified accordingly such as the number of epochs to train for.
