@@ -126,8 +126,9 @@ def traverse_collect_images(loc1,loc2,dir='../temp/', fov = 90):
             img_name = f"right{i}_{h}_{c[0]}_{c[1]}.jpg"
             with open(os.path.join(dir, img_name), 'wb') as file:
                 file.write(img.content)
+    return coors
 
-def traverse_straight(loc1,loc2,dir='../temp/'):
+def traverse_straight(loc1='',loc2='',coors = None, dir='./'):
     one = loc1.split(',')
     one[0] = float(one[0])
     one[1] = float(one[1])
@@ -137,11 +138,12 @@ def traverse_straight(loc1,loc2,dir='../temp/'):
     #first number indicates y coordinate and second number indicate x coordinate
     ygap = two[0] - one[0]
     xgap = two[1] - one[1]
-    length = (xgap**2+ygap**2)**0.5
     ang = np.arctan2(ygap,xgap)
-    coors = unique_coordinates(one,ang,length)
+    if coors == None:
+        length = (xgap**2+ygap**2)**0.5
+        coors = unique_coordinates(one,ang,length)
     for i,c in enumerate(coors):
-        img = get_pic(loc = float_to_co(c),heading = ang_add(ang,0),size='2560x2560')
+        img = get_pic(loc = float_to_co(c),heading = ang_add(ang,0),size='960x960')
         with open(os.path.join(dir, 'test'+str(i)+'.jpg'), 'wb') as file:
             file.write(img.content)
 
@@ -171,37 +173,11 @@ def traverse_curves(locs, dir = '../temp/'):
             idx+=1
 
 #dir = '../temp/giftest'
-def gif_gen(dir,duration = None):
+def gif_gen(dir = './', output_dir = './',filename='test',duration = None):
     images = []
     for f in sorted(os.listdir(dir)):
         images.append(imageio.imread(os.path.join(dir,f)))
     if duration:
-        imageio.mimsave(os.path.join(dir,'test.gif'), images, duration = duration)
+        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images, duration = duration)
     else:
-        imageio.mimsave(os.path.join(dir,'test.gif'), images)     
-#sample code 2
-# %%
-loc1 = '32.8209644,-117.1861909'
-loc2 = '32.8195283,-117.1861259'
-traverse_collect_images(loc1,loc2, './test_2/', fov = 45),
-
-# %%
-loc1 = '32.6781445,-117.098631'
-loc2 = '32.6787394,-117.0967834'
-#traverse_collect_images(loc1,loc2, './test/')
-
-# %%
-loc1 = '32.8209644,-117.1861909'
-loc2 = '32.8195283,-117.1861259'
-#traverse_straight(loc1,loc2)
-# %%
-#traversing the curvy part and generating gif
-locs =[
-    '32.8209644,-117.1861909',
-    '32.8195283,-117.1861259',
-    '32.81854015068618,-117.18570029754645'
-]
-#traverse_curves(locs)
-
-# %%
-#gif_gen('../temp/giftest/fin_gif', duration = 0.08)
+        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images)     
