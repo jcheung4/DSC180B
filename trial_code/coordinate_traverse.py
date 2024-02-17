@@ -40,13 +40,14 @@ def gen_url(params, input_url=pic_base):
         out = out+"&"+str(i)+"="+str(params[i])
     return out
 
-def get_pic(loc='',size='960x960',heading =0,pitch=5):
+def get_pic(loc='',size='960x960',heading =0,pitch=5, fov = 90):
     pic_params = {
         'key': API_KEY,
         'location': loc,
         'size': size,
         'heading':heading,
         'pitch':pitch,
+        'fov':fov
     }
     if SECRET:
         pic_response = requests.get(sign_url(input_url=gen_url(pic_params)))
@@ -105,17 +106,18 @@ def traverse_collect_images(loc1,loc2,dir='../temp/'):
     length = (xgap**2+ygap**2)**0.5
     ang = np.arctan2(ygap,xgap)
     coors = unique_coordinates(one,ang,length)
-    leftside = [-150,-90,-30]
-    rightside = [150,90,30]
+    leftside = [-90]
+    rightside = [90]
     for i,c in enumerate(coors):
         for h in leftside:
-            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h))
+            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h),fov=40)
             with open(os.path.join(dir, 'test'+str(i)+'_'+str(h)+'.jpg'), 'wb') as file:
                 file.write(img.content)
         for h in rightside:
-            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h))
+            img = get_pic(loc = float_to_co(c),heading = ang_add(ang,h),fov=40)
             with open(os.path.join(dir, 'test'+str(i)+'_'+str(h)+'.jpg'), 'wb') as file:
                 file.write(img.content)
+    return coors
 
 def traverse_straight(loc1,loc2,dir='../temp/'):
     one = loc1.split(',')
@@ -161,14 +163,14 @@ def traverse_curves(locs, dir = '../temp/'):
             idx+=1
 
 #dir = '../temp/giftest'
-def gif_gen(dir,duration = None):
+def gif_gen(dir='./',output_dir='./',filename='test',duration = None):
     images = []
     for f in sorted(os.listdir(dir)):
         images.append(imageio.imread(os.path.join(dir,f)))
     if duration:
-        imageio.mimsave(os.path.join(dir,'test.gif'), images, duration = duration)
+        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images, duration = duration)
     else:
-        imageio.mimsave(os.path.join(dir,'test.gif'), images)
+        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images)
 #sample code, provided loc1, loc2. This just to show the code work. 
 #The heading is set to 0 which to see if the heading is following the road.
 """
@@ -194,12 +196,13 @@ for i,c in enumerate(coors):
         file.write(img.content)
 """
 #sample code 2
-"""
-loc1='32.85179322509682,-117.19691677340164'
-loc2='32.8514507286907,-117.19493193834228'
+#%%
+loc1 = '32.82085783642146, -117.1861242353904'
+loc2 = '32.8195283,-117.1861259'
 traverse_collect_images(loc1,loc2)
 
 # %%
+"""
 loc1 = '32.8209644,-117.1861909'
 loc2 = '32.8195283,-117.1861259'
 traverse_straight(loc1,loc2)
