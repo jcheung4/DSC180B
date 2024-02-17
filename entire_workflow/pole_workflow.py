@@ -35,4 +35,4 @@ if __name__== "__main__":
     pole_detection.run_detection(loc1, loc2)
     
     
-    shutil.rmtree('entire_workflow/__pycache__')
+    shutil.rmtree('__pycache__')
