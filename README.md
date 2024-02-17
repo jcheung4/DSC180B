@@ -61,7 +61,7 @@ After the model is finished training, output files will be saved to the `entire_
 
 In order to run the model to identify wooden and metal poles along the streets of 2 coordiante pairs, run:
 ```
-python pole_workflow.py [coordinate pair 1] [coordinate pair 2]
+python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 ```
 > [!NOTE]
 > Example:
