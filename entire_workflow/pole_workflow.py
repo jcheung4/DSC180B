@@ -36,3 +36,5 @@ if __name__== "__main__":
     
     
     shutil.rmtree('__pycache__')
+    shutil.rmtree('temp_images')
+    shutil.rmtree('temp_gif_images')
