@@ -7,6 +7,26 @@ CREATE TABLE poles (
     type VARCHAR(6)
 );
 
+CREATE TABLE poles_sample (
+    id SERIAL PRIMARY KEY,
+    "GIS_LATITUDE" DOUBLE PRECISION,
+    "GIS_LONGITUDE" DOUBLE PRECISION,
+    "GIS_OH_MATERIAL" VARCHAR(6)
+);
+
+COPY poles_sample("GIS_LATITUDE", "GIS_LONGITUDE", "GIS_OH_MATERIAL")
+FROM '/docker-entrypoint-initdb.d/poles_sample.csv' DELIMITER ',' CSV HEADER;
+
+INSERT INTO poles (latitude, longitude, type)
+SELECT "GIS_LATITUDE"::DOUBLE PRECISION, 
+       "GIS_LONGITUDE"::DOUBLE PRECISION, 
+       CASE 
+           WHEN "GIS_OH_MATERIAL" = 'WOOD' THEN 'Wooden'
+           WHEN "GIS_OH_MATERIAL" = 'STEEL' THEN 'Metal'
+           ELSE "GIS_OH_MATERIAL"
+       END
+FROM poles_sample;
+
 INSERT INTO poles (latitude, longitude, type) VALUES
     (32.8517336, -117.1965509, 'Wooden'),
     (32.8516457, -117.1961353, 'Wooden'),
