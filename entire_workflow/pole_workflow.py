@@ -35,6 +35,7 @@ if __name__== "__main__":
     pole_detection.run_detection(loc1, loc2)
     
     
-    shutil.rmtree('__pycache__')
+    shutil.rmtree('entire_workflow/__pycache__')
     shutil.rmtree('temp_images')
+    shutil.rmtree('temp_bb_images')
     shutil.rmtree('temp_gif_images')
