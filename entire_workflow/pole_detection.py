@@ -14,7 +14,6 @@ def run_detection(loc1, loc2):
     import pycocotools.coco as coco
     from pycocotools.coco import COCO
     import numpy as np
-    import skimage.io as io
     import matplotlib.pyplot as plt
     import pylab
     pylab.rcParams['figure.figsize'] = (10.0, 8.0)
@@ -69,7 +68,7 @@ def run_detection(loc1, loc2):
         ax = plt.gca()
         colors = COLORS * 100
         if prob is not None and boxes is not None:
-            for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes.tolist(), colors):
+            for p, (xmin, ymin, xmax, ymax), c in zip(prob, boxes, colors):
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                             fill=False, color=c, linewidth=3))
                 cl = p.argmax()
@@ -98,7 +97,7 @@ def run_detection(loc1, loc2):
                         pretrained=False,
                         num_classes=num_classes)
 
-    checkpoint = torch.load('models/checkpoint_Q1.pth',
+    checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
                             map_location='cpu')
 
     model.load_state_dict(checkpoint['model'],
@@ -132,6 +131,61 @@ def run_detection(loc1, loc2):
     
     print("FINISHED CREATING TEMP DB")
 
+    def filterOverlappingBox(prob, bbox, threshold = 0.3):
+        def isOverlapping2D(box1, box2):
+            def isOverlapping1D(xmin1, xmax1,xmin2, xmax2):
+                return xmin1 <= xmax2 and xmin2 <= xmax1
+            xmin1, ymin1, xmax1, ymax1 = box1
+            xmin2, ymin2, xmax2, ymax2 = box2
+
+            return isOverlapping1D(xmin1, xmax1,xmin2, xmax2) and isOverlapping1D(ymin1, ymax1,ymin2, ymax2)
+
+        def overlappingArea(box1,box2):
+            def overlappingLine(xmin1, xmax1,xmin2, xmax2):
+                return min(xmax1, xmax2) - max(xmin1,xmin2)
+            xmin1, ymin1, xmax1, ymax1 = box1
+            xmin2, ymin2, xmax2, ymax2 = box2
+            return overlappingLine(xmin1, xmax1,xmin2, xmax2)*overlappingLine(ymin1, ymax1,ymin2, ymax2)
+
+        def boxArea(box):
+            xmin, ymin, xmax, ymax = box
+            return (xmax-xmin)*(ymax-ymin)
+        
+        i=0
+        j=1
+        removed =[]
+        while(i<len(bbox)-1):
+            if i in removed or j>= len(bbox):
+                i += 1
+                j = i+1
+                continue
+            if j in removed:
+                j +=1
+                continue
+            box1 = bbox[i]
+            box2 = bbox[j]
+            if isOverlapping2D(box1, box2):
+                area1 = boxArea(box1)
+                area2 = boxArea(box2)
+                areaO = overlappingArea(box1,box2)
+                if (areaO/area1)>threshold or (areaO/area2)>threshold:
+                    p1 = prob[i]
+                    p2 = prob[2]
+
+                    if p1.max()<p2.max():
+                        removed += [i]
+                    else:
+                        removed += [j]    
+            j+=1
+
+        out_prob = []
+        out_bbox = []
+        for i in range(len(bbox)):
+            if i not in removed:
+                out_prob += [prob[i]]
+                out_bbox += [bbox[i]]
+        return out_prob,out_bbox
+
     def run_worflow(my_image, my_model, img_name):
         # mean-std normalize the input image (batch-size: 1)
         img = transform(my_image).unsqueeze(0)
@@ -143,9 +197,10 @@ def run_detection(loc1, loc2):
 
             probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs,
                                                                     threshold=threshold)
+            probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled)
             
             if probas_to_keep is not None and bboxes_scaled is not None:
-                for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled.tolist()):
+                for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
                     cl = p.argmax()
                     
                     img_split = img_name.split('_')
