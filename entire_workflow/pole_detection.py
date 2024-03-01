@@ -1,28 +1,4 @@
 def run_detection(loc1, loc2):
-    import torch, torchvision
-    print(torch.__version__, torch.cuda.is_available())
-    torch.set_grad_enabled(False)
-
-    import torchvision.transforms as T
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-    import psycopg2
-    
-    import os
-    import json
-
-    import pycocotools.coco as coco
-    from pycocotools.coco import COCO
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import pylab
-    pylab.rcParams['figure.figsize'] = (10.0, 8.0)
-
-    from PIL import Image
-    import glob
-
-    import re
-    
     import logging
 
     # Configure the logging
@@ -33,13 +9,41 @@ def run_detection(loc1, loc2):
     )
     
     logging.info("Start of pole_detection.py")
+    
+    import torch, torchvision
+    print(torch.__version__, torch.cuda.is_available())
+    logging.info(torch.__version__)
+    logging.info(torch.cuda.is_available())
+    torch.set_grad_enabled(False)
 
+    import torchvision.transforms as T
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+    import psycopg2
+    
+    import os
+    import json
+    
+    # Im not sure what the purpose of this is so I commented them out bc website didnt like it
+    #import pycocotools.coco as coco
+    #from pycocotools.coco import COCO
+  
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import pylab
+    pylab.rcParams['figure.figsize'] = (10.0, 8.0)
+
+    from PIL import Image
+    import glob
+
+    import re
+    
     # To sort images because it was doing left0, left1, left10, instead of left0, left1, left2
     def natural_sort_key(s):
         return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
 
 
+    logging.info("Finished all imports")
     # standard PyTorch mean-std input image normalization
     transform = T.Compose([
         T.Resize(800),
@@ -270,6 +274,8 @@ def run_detection(loc1, loc2):
     latitude1, longitude1 = loc1.split(',')
     latitude2, longitude2 = loc2.split(',')
     
+    logging.info("Finished Inserting Poles Detected Into Temporary Database")
+    
     cur.execute(
         '''
         SELECT * FROM mypoles;
@@ -343,6 +349,8 @@ def run_detection(loc1, loc2):
     '''
     )
     
+    logging.info("Deleted Temporary Database")
+    
     with open('entire_workflow/results.txt', 'a') as file:
         file.write("<---------------------------------------------------------------------->\n")
         file.write(f"Coordinate Pair: ({loc1}), ({loc2})\n\n")
@@ -358,5 +366,7 @@ def run_detection(loc1, loc2):
         json.dump(db_poles_count, file, indent=4)
         file.write("\n")
         file.write("<---------------------------------------------------------------------->\n")
+        
+        logging.info("Finished Writing Findings to results.txt")
         
     logging.info("Finished pole_detection.py")
