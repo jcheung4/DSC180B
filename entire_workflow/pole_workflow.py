@@ -51,4 +51,10 @@ if __name__== "__main__":
     shutil.rmtree('entire_workflow/temp_bb_images')
     shutil.rmtree('entire_workflow/temp_gif_images')
     
+    # For Demo Website
+    shutil.copy(
+        'entire_workflow/results.txt',
+        'static/results.txt'
+    )
+    
     logging.info("Finished pole_workflow.py")

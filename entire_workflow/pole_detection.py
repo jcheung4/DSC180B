@@ -352,6 +352,7 @@ def run_detection(loc1, loc2):
     logging.info("Deleted Temporary Database")
     
     with open('entire_workflow/results.txt', 'a') as file:
+        file.write('\n')
         file.write("<---------------------------------------------------------------------->\n")
         file.write(f"Coordinate Pair: ({loc1}), ({loc2})\n\n")
         

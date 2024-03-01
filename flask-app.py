@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import subprocess
 import threading
+import os
 
 app = Flask(__name__)
+app.secret_key = 'dsc180b'
 
 @app.route('/')
 def index():
@@ -19,11 +21,9 @@ def add_coordinates():
     thread = threading.Thread(target=run_pole_workflow, args=(lat1, lon1, lat2, lon2))
     thread.start()
     
-    return render_template('index.html')
-
-    #return jsonify({'status': 'Processing the request in the background'})
-
-    #return render_template('index.html', result=result)
+    flash('Processing...', 'info')
+    return redirect(url_for('index'))
+   # return render_template('index.html')
 
 def run_pole_workflow(lat1, lon1, lat2, lon2):
     # Build the command
@@ -33,7 +33,8 @@ def run_pole_workflow(lat1, lon1, lat2, lon2):
         # Run the command and capture the output
         print("Running Script")
         result = subprocess.run(command, capture_output=True, text=True, check=True)
-        return result.stdout
+        flash('Workflow completed successfully', 'success')
+        return redirect('index')
     except subprocess.CalledProcessError as e:
         return f"Error: {e.stderr}"
 
