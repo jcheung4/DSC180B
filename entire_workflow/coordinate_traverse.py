@@ -11,6 +11,12 @@ import numpy as np
 from PIL import Image, ImageSequence
 import imageio
 
+import re
+    
+# To sort images because it was doing left0, left1, left10, instead of left0, left1, left2
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
+
 load_dotenv()
 
 API_KEY = os.environ.get("API_KEY")
@@ -177,7 +183,7 @@ def traverse_curves(locs, dir = '../temp/'):
 def gif_gen(dir = './', output_dir = './',filename='test',duration = None):
     images_forward = []
     images_backward = []
-    for f in sorted(os.listdir(dir)):
+    for f in sorted(os.listdir(dir), key=natural_sort_key):
         img = Image.open(os.path.join(dir, f))
         images_forward.append(img)
         images_backward.append(img)

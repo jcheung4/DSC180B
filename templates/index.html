@@ -33,8 +33,8 @@
 
 
         <div class="gif-container">
-            <h1>Sample Traversal Gif</h1>
-            <img src="static/sample_traverse.gif" alt="Your GIF">
+            <h1>Street Traversal Gif</h1>
+            <img id="gifImage" src="static/sample_traverse.gif" alt="Your GIF">
         </div>
     </div>
     <div class="results-container">
@@ -67,6 +67,17 @@
                     document.getElementById('resultsContent').innerText = data;
                 })
                 .catch(error => console.error('Error fetching results.txt:', error));
+
+            // Fetch the new GIF dynamically
+            fetch('static/sample_traverse.gif')  // Replace with the correct path to the new GIF
+                .then(response => response.blob())
+                .then(blob => {
+                    // Create a data URL for the new GIF
+                    const imageUrl = URL.createObjectURL(blob);
+                    // Update the src attribute of the img tag
+                    document.getElementById('gifImage').src = imageUrl;
+                })
+                .catch(error => console.error('Error fetching new GIF:', error));
         }
 
         // Periodically update results content (every 5 seconds in this example)

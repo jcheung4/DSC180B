@@ -45,8 +45,17 @@ if __name__== "__main__":
     if not os.path.exists(temp_gif_dif):
         os.mkdir(temp_gif_dif)
     coors = coordinate_traverse.traverse_collect_images(loc1, loc2, temp_dir)
+    
+    logging.info("Collecting Images")
     coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dif)
+    
     coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'entire_workflow/', filename='sample_traverse',duration = 0.1)
+    logging.info("Finishec Creating Gif")
+    
+    shutil.copy(
+        'entire_workflow/sample_traverse.gif',
+        'static/sample_traverse.gif'
+    )
 
     logging.info("Finished Collecting Images")
     print("FINISHED GETTING IMAGES")
@@ -57,10 +66,5 @@ if __name__== "__main__":
     shutil.rmtree('entire_workflow/temp_images')
     shutil.rmtree('entire_workflow/temp_bb_images')
     shutil.rmtree('entire_workflow/temp_gif_images')
-   
-    shutil.copy(
-        'entire_workflow/sample_traverse.gif',
-        'static/sample_traverse.gif'
-    )
     
     logging.info("Finished pole_workflow.py")

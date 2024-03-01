@@ -7,7 +7,6 @@ entire_workflow/models/*
 temp_images
 temp_bb_images
 temp_gif_images
-sample_traverse.gif
 results.txt
 logfile.txt
 sample-log.txt
