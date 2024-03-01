@@ -3,17 +3,18 @@ def run_detection(loc1, loc2):
 
     # Configure the logging
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[logging.FileHandler('entire_workflow/logfile.txt', mode='a')]
-    )
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('entire_workflow/logfile.txt', mode='a'),
+        logging.FileHandler('static/sample-log.txt', mode = 'a')
+    ]
+)
     
     logging.info("Start of pole_detection.py")
     
     import torch, torchvision
     print(torch.__version__, torch.cuda.is_available())
-    logging.info(torch.__version__)
-    logging.info(torch.cuda.is_available())
     torch.set_grad_enabled(False)
 
     import torchvision.transforms as T
@@ -351,6 +352,22 @@ def run_detection(loc1, loc2):
     
     logging.info("Deleted Temporary Database")
     
+    with open('static/results.txt', 'w') as file:
+        file.write(f"Coordinate Pair: ({loc1}), ({loc2})\n\n")
+        
+        file.write("Our Pole Count:\n")
+        json.dump(my_poles_count, file, indent=4)
+        
+        # Add a newline for separation
+        file.write("\n\n")
+        
+        # Write "Their Count:" and the second dictionary
+        file.write("Dummy DB Pole Count:\n")
+        json.dump(db_poles_count, file, indent=4)
+        file.write("\n")
+        
+        logging.info("Finished Writing Findings to results.txt")
+    
     with open('entire_workflow/results.txt', 'a') as file:
         file.write('\n')
         file.write("<---------------------------------------------------------------------->\n")
@@ -367,7 +384,5 @@ def run_detection(loc1, loc2):
         json.dump(db_poles_count, file, indent=4)
         file.write("\n")
         file.write("<---------------------------------------------------------------------->\n")
-        
-        logging.info("Finished Writing Findings to results.txt")
         
     logging.info("Finished pole_detection.py")

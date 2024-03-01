@@ -1,0 +1,62 @@
+form {
+    margin-right: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px; /* Adjust the margin as needed */
+}
+
+label {
+    display: block;
+    margin-bottom: 10px; /* Increase the margin-bottom to add more space */
+}
+
+label {
+    display: inline-block; /* Set labels to be inline-block */
+    margin-bottom: 10px;
+}
+
+input {
+    margin-bottom: 15px; /* Adjust the margin-bottom to add more space */
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+.container {
+    display: flex;
+}
+.gif-container {
+    flex: 1;
+    text-align: center;
+}
+
+.gif-container h1 {
+    margin-bottom: 0px; /* Adjust to match the margin of h1 */
+    margin-top: 10; /* Add this to remove top margin */
+}
+
+.gif-container img {
+    max-width: 25%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px; /* Adjust the top margin to move the image up */
+}
+
+.results-container {
+    display: flex;
+}
+
+.results-left,
+.results-right {
+    flex: 1;
+}
+
+.results-right {
+    margin-left: 20px; /* Adjust the margin between the two results sections */
+}

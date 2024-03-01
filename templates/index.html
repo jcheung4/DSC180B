@@ -4,30 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSC180B ODDS</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>Pole Detection</h1>
-    <form action="/add_coordinates" method="post">
-        <label for="lat1">Latitude 1:</label>
-        <input type="text" name="lat1" required>
-        <label for="lon1">Longitude 1:</label>
-        <input type="text" name="lon1" required>
-        <br>
-        <label for="lat2">Latitude 2:</label>
-        <input type="text" name="lat2" required>
-        <label for="lon2">Longitude 2:</label>
-        <input type="text" name="lon2" required>
-        <br>
-        <button type="submit">Run Workflow</button>
-    </form>
+    <div class="container">
+        <form action="/workflow" method="post">
+            <div class="form-group">
+                <label for="lat1">Latitude 1:</label>
+                <input type="text" name="lat1" required>
+            </div>
+            <div class="form-group">
+                <label for="lon1">Longitude 1:</label>
+                <input type="text" name="lon1" required>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="lat2">Latitude 2:</label>
+                <input type="text" name="lat2" required>
+            </div>
+            <div class="form-group">
+                <label for="lon2">Longitude 2:</label>
+                <input type="text" name="lon2" required>
+            </div>
+            <br>
+            <button type="submit">Run Workflow</button>
+        </form>
 
-    <h2>Contents of results.txt:</h2>
-    <pre id="resultsContent"></pre>
+
+        <div class="gif-container">
+            <h1>Sample Traversal Gif</h1>
+            <img src="static/sample_traverse.gif" alt="Your GIF">
+        </div>
+    </div>
+    <div class="results-container">
+        <div class="results-left">
+            <h2>Logs:</h2>
+            <pre id="logContent"></pre>
+        </div>
+        <div class="results-right">
+            <h2>Results:</h2>
+            <pre id="resultsContent"></pre>
+        </div>
+    </div>
 
     <script>
         // Function to update results content using AJAX
         function updateResults() {
             // Fetch contents of results.txt directly
+            fetch('static/sample-log.txt')  // Replace with the correct path to results.txt
+                .then(response => response.text())
+                .then(data => {
+                    // Update the results content on the page
+                    document.getElementById('logContent').innerText = data;
+                })
+                .catch(error => console.error('Error fetching results.txt:', error));
+
             fetch('static/results.txt')  // Replace with the correct path to results.txt
                 .then(response => response.text())
                 .then(data => {

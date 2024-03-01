@@ -3,10 +3,17 @@ import os
 import shutil
 import logging
 
+# Clears out results.txt for demo purposes
+with open('static/results.txt', 'w') as file:
+    file.write('\nWaiting for results...')
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('entire_workflow/logfile.txt', mode='a')]
+    handlers=[
+        logging.FileHandler('entire_workflow/logfile.txt', mode='a'),
+        logging.FileHandler('static/sample-log.txt', mode = 'w')
+    ]
 )
     
 logging.info("Start of pole_workflow.py")
@@ -50,11 +57,10 @@ if __name__== "__main__":
     shutil.rmtree('entire_workflow/temp_images')
     shutil.rmtree('entire_workflow/temp_bb_images')
     shutil.rmtree('entire_workflow/temp_gif_images')
-    
-    # For Demo Website
+   
     shutil.copy(
-        'entire_workflow/results.txt',
-        'static/results.txt'
+        'entire_workflow/sample_traverse.gif',
+        'static/sample_traverse.gif'
     )
     
     logging.info("Finished pole_workflow.py")

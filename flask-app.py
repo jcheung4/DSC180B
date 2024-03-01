@@ -10,8 +10,8 @@ app.secret_key = 'dsc180b'
 def index():
     return render_template('index.html')
 
-@app.route('/add_coordinates', methods=['POST'])
-def add_coordinates():
+@app.route('/workflow', methods=['POST'])
+def workflow():
     lat1 = request.form['lat1']
     lon1 = request.form['lon1']
     lat2 = request.form['lat2']

@@ -8,6 +8,7 @@ import hmac
 import urllib.parse as urlparse
 import hashlib
 import numpy as np
+from PIL import Image, ImageSequence
 import imageio
 
 load_dotenv()
@@ -174,10 +175,29 @@ def traverse_curves(locs, dir = '../temp/'):
 
 #dir = '../temp/giftest'
 def gif_gen(dir = './', output_dir = './',filename='test',duration = None):
-    images = []
+    images_forward = []
+    images_backward = []
     for f in sorted(os.listdir(dir)):
-        images.append(imageio.imread(os.path.join(dir,f)))
+        img = Image.open(os.path.join(dir, f))
+        images_forward.append(img)
+        images_backward.append(img)
+        #images.append(imageio.imread(os.path.join(dir,f)))
+        
+    images_backward = images_backward[::-1]
+    
     if duration:
-        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images, duration = duration)
+        images_forward[0].save(
+            f'{output_dir}sample_traverse.gif',
+            save_all = True,
+            append_images=images_forward[1:] + images_backward,
+            duration = duration,
+            loop = 0
+        )
+        #imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images, duration = duration)
     else:
-        imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images)     
+        images_forward[0].save(
+            f'{dir}sample_traverse.gif',
+            save_all = True,
+            append_images=images_forward[1:] +images_backward
+        )
+        #imageio.mimsave(os.path.join(output_dir,str(filename)+'.gif'), images)     
