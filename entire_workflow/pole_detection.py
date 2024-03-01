@@ -359,4 +359,4 @@ def run_detection(loc1, loc2):
         file.write("\n")
         file.write("<---------------------------------------------------------------------->\n")
         
-    logging.info("Finished Workflow")
+    logging.info("Finished pole_detection.py")

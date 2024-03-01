@@ -23,11 +23,11 @@ def add_coordinates():
 
     #return jsonify({'status': 'Processing the request in the background'})
 
-    return render_template('index.html', result=result)
+    #return render_template('index.html', result=result)
 
 def run_pole_workflow(lat1, lon1, lat2, lon2):
     # Build the command
-    command = ['python3', 'pole_workflow.py', f'{lat1},{lon1}', f'{lat2},{lon2}']
+    command = ['python3', 'entire_workflow/pole_workflow.py', f'{lat1},{lon1}', f'{lat2},{lon2}']
 
     try:
         # Run the command and capture the output

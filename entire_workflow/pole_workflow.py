@@ -14,10 +14,7 @@ logging.info("Start of pole_workflow.py")
 import coordinate_traverse
 import pole_detection
 
-#coordinate_traverse.traverse_collect_images()
-
 # Example of how to run script:
-# python3 pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
 # python3 entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
 
 loc1 = sys.argv[1]
@@ -53,3 +50,5 @@ if __name__== "__main__":
     shutil.rmtree('entire_workflow/temp_images')
     shutil.rmtree('entire_workflow/temp_bb_images')
     shutil.rmtree('entire_workflow/temp_gif_images')
+    
+    logging.info("Finished pole_workflow.py")
