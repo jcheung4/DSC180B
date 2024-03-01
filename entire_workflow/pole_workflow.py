@@ -1,6 +1,15 @@
 import sys
 import os
 import shutil
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.FileHandler('entire_workflow/logfile.txt', mode='a')]
+)
+    
+logging.info("Start of pole_workflow.py")
 
 import coordinate_traverse
 import pole_detection
@@ -9,13 +18,17 @@ import pole_detection
 
 # Example of how to run script:
 # python3 pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
+# python3 entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
 
 loc1 = sys.argv[1]
 loc2 = sys.argv[2]
 
-temp_dir = 'temp_images'
-temp_bb_dir = 'temp_bb_images'
-temp_gif_dif = 'temp_gif_images'
+logging.info(f"First Coordinate Pair: {loc1}")
+logging.info(f"Second Coordinte Pair: {loc2}")
+
+temp_dir = 'entire_workflow/temp_images'
+temp_bb_dir = 'entire_workflow/temp_bb_images'
+temp_gif_dif = 'entire_workflow/temp_gif_images'
 
 
 if __name__== "__main__":
@@ -29,13 +42,14 @@ if __name__== "__main__":
         os.mkdir(temp_gif_dif)
     coors = coordinate_traverse.traverse_collect_images(loc1, loc2, temp_dir)
     coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dif)
-    coordinate_traverse.gif_gen(dir=temp_gif_dif,filename='sample_traverse',duration = 0.1)
+    coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'entire_workflow/', filename='sample_traverse',duration = 0.1)
 
+    logging.info("Finished Collecting Images")
     print("FINISHED GETTING IMAGES")
     pole_detection.run_detection(loc1, loc2)
     
     
     shutil.rmtree('entire_workflow/__pycache__')
-    shutil.rmtree('temp_images')
-    shutil.rmtree('temp_bb_images')
-    shutil.rmtree('temp_gif_images')
+    shutil.rmtree('entire_workflow/temp_images')
+    shutil.rmtree('entire_workflow/temp_bb_images')
+    shutil.rmtree('entire_workflow/temp_gif_images')

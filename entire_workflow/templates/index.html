@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSC180B ODDS</title>
+</head>
+<body>
+    <h1>Pole Detection</h1>
+    <form action="/add_coordinates" method="post">
+        <label for="lat1">Latitude 1:</label>
+        <input type="text" name="lat1" required>
+        <label for="lon1">Longitude 1:</label>
+        <input type="text" name="lon1" required>
+        <br>
+        <label for="lat2">Latitude 2:</label>
+        <input type="text" name="lat2" required>
+        <label for="lon2">Longitude 2:</label>
+        <input type="text" name="lon2" required>
+        <br>
+        <button type="submit">Run Workflow</button>
+    </form>
+
+    {% if total_lat is defined and total_lon is defined %}
+        <h2>Result</h2>
+        <p>Total Latitude: {{ total_lat }}</p>
+        <p>Total Longitude: {{ total_lon }}</p>
+    {% endif %}
+</body>
+</html>

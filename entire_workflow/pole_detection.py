@@ -22,6 +22,18 @@ def run_detection(loc1, loc2):
     import glob
 
     import re
+    
+    import logging
+
+    # Configure the logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[logging.FileHandler('entire_workflow/logfile.txt', mode='a')]
+    )
+    
+    logging.info("Start of pole_detection.py")
+
 
     # To sort images because it was doing left0, left1, left10, instead of left0, left1, left2
     def natural_sort_key(s):
@@ -108,6 +120,7 @@ def run_detection(loc1, loc2):
     min_height = 250
 
     print("Finised Setup Before DB")
+    logging.info("Loaded in Model")
     # Setting up Database
     conn = psycopg2.connect(
         host = 'localhost',
@@ -130,6 +143,7 @@ def run_detection(loc1, loc2):
     )
     
     print("FINISHED CREATING TEMP DB")
+    logging.info('Created Temporary Database')
 
     def filterOverlappingBox(prob, bbox, threshold = 0.3):
         def isOverlapping2D(box1, box2):
@@ -329,7 +343,10 @@ def run_detection(loc1, loc2):
     '''
     )
     
-    with open('results.txt', 'w') as file:
+    with open('entire_workflow/results.txt', 'a') as file:
+        file.write("<---------------------------------------------------------------------->\n")
+        file.write(f"Coordinate Pair: ({loc1}), ({loc2})\n\n")
+        
         file.write("Our Pole Count:\n")
         json.dump(my_poles_count, file, indent=4)
         
@@ -339,3 +356,7 @@ def run_detection(loc1, loc2):
         # Write "Their Count:" and the second dictionary
         file.write("Dummy DB Pole Count:\n")
         json.dump(db_poles_count, file, indent=4)
+        file.write("\n")
+        file.write("<---------------------------------------------------------------------->\n")
+        
+    logging.info("Finished Workflow")

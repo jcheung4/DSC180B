@@ -66,5 +66,5 @@ python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 > [!NOTE]
 > Example:
 > ```
-> python pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
+> python entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
 > ```
