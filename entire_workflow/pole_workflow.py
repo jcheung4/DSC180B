@@ -49,7 +49,7 @@ if __name__== "__main__":
     logging.info("Collecting Images")
     coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dif)
     
-    coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'entire_workflow/', filename='sample_traverse',duration = 0.1)
+    coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'static/', filename='sample_traverse',duration = 0.1)
     logging.info("Finishec Creating Gif")
     
     shutil.copy(
