@@ -23,6 +23,8 @@ import pole_detection
 
 # Example of how to run script:
 # python3 entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
+# TEST DEMO:
+# '32.7077092,-117.0841702' '32.70771,-117.0832791'
 
 loc1 = sys.argv[1]
 loc2 = sys.argv[2]
@@ -50,12 +52,7 @@ if __name__== "__main__":
     coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dif)
     
     coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'static/', filename='sample_traverse',duration = 0.1)
-    logging.info("Finishec Creating Gif")
-    
-    shutil.copy(
-        'entire_workflow/sample_traverse.gif',
-        'static/sample_traverse.gif'
-    )
+    logging.info("Finished Creating Gif")
 
     logging.info("Finished Collecting Images")
     print("FINISHED GETTING IMAGES")
