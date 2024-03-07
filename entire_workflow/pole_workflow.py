@@ -61,7 +61,7 @@ if __name__== "__main__":
     
     shutil.rmtree('entire_workflow/__pycache__')
     shutil.rmtree('entire_workflow/temp_images')
-    shutil.rmtree('entire_workflow/temp_bb_images')
+    #shutil.rmtree('entire_workflow/temp_bb_images')
     shutil.rmtree('entire_workflow/temp_gif_images')
     
     logging.info("Finished pole_workflow.py")

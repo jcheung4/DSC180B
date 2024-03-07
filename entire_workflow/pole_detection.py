@@ -94,7 +94,12 @@ def run_detection(loc1, loc2):
                         bbox=dict(facecolor='yellow', alpha=0.5))
             plt.axis('off')
             
-            save_path = os.path.join('temp_bb_images', img_name.split('/')[1])
+            img_name_lst = img_name.split('/')[-1].split('_')
+            img_name_final = f"{img_name_lst[0]}_{img_name_lst[1]}"
+            print(img_name_final)
+            
+            save_path = os.path.join('entire_workflow/temp_bb_images', img_name_final)
+            print(save_path)
             # Save the plot as an image
             plt.savefig(save_path, bbox_inches='tight', pad_inches=0.1)
             
@@ -114,6 +119,9 @@ def run_detection(loc1, loc2):
                         pretrained=False,
                         num_classes=num_classes)
 
+    #checkpoint = torch.load('entire_workflow/models/model_final2.pth',
+    #                        map_location='cpu')
+    
     checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
                             map_location='cpu')
 
@@ -212,8 +220,7 @@ def run_detection(loc1, loc2):
         # propagate through the model
         outputs = my_model(img)
 
-        for threshold in [0.75]:
-
+        for threshold in [0.4]:
             probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs,
                                                                     threshold=threshold)
             probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled)
@@ -221,20 +228,26 @@ def run_detection(loc1, loc2):
             if probas_to_keep is not None and bboxes_scaled is not None:
                 for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
                     cl = p.argmax()
+                    img_split = img_name.split('/')[-1].split('_')
                     
-                    img_split = img_name.split('_')
                     latitude = img_split[2]
                     longitude = img_split[3][:-4]
                     pole_type = finetuned_classes[cl]
                     
                     cur_area = (xmax - xmin) * (ymax - ymin)
+        
                     cur_height = ymax - ymin
                     
                     if cur_area > min_area:
                     #if height > min_height:
+                        #insert_query = f" \
+                        #INSERT INTO mypoles (latitude, longitude, type) VALUES \
+                        #({latitude}, {longitude}, '{pole_type}') \
+                        #"
+                        
                         insert_query = f" \
                         INSERT INTO mypoles (latitude, longitude, type) VALUES \
-                        ({latitude}, {longitude}, '{pole_type}') \
+                        ({latitude}, {longitude}, 'Wooden') \
                         "
                         
                         cur.execute(insert_query)
@@ -246,7 +259,7 @@ def run_detection(loc1, loc2):
                                 bboxes_scaled,
                                 img_name)
         
-    image_paths = glob.glob('temp_images/*.jpg')
+    image_paths = glob.glob('entire_workflow/temp_images/*.jpg')
     left_images = []
     right_images = []
 
@@ -262,7 +275,6 @@ def run_detection(loc1, loc2):
     for image in left_images:
         print(image)    
         im = Image.open(image)
-
         run_worflow(im, model, image)
         
     for image in right_images:
