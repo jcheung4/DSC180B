@@ -10,6 +10,11 @@ Running `python scripts/image_collection/collect_images.py` will download all th
 
 
 ## Setup
+Create a .env file with variables from Google Cloud:
+```
+API_KEY='your_api_key'
+SECRET='your_secret_key'
+```
 
 ### Conda Environment
 After cloning repository, navigate to root level and run:
@@ -27,11 +32,17 @@ cd ..
 ```
 
 ### Create Training/Validation Datasets and Prepare files to train model
-After downloading `images` folder into the `data` directory, run:
+After downloading `images` folder into the `data` directory, split the data into training/validation set by running:
 ```
-python scripts/initialize.py
+python scripts/cocosplit.py --having-annotations --multi-class -s 0.8 annotations/combined-everyone.json data/custom/annotations/custom_train.json data/custom/annotations/custom_val.json
 ```
+[Cocosplit Repo](https://github.com/akarazniewicz/cocosplit)
 This will download the model's "base" and split the data into training/validation sets based on the COCO json annotations.
+
+To split the images into its train and validation set, run:
+```
+python scripts/train-val-split.py
+```
 
 ### Train the Model
 In order to train the model, run the following:
@@ -49,7 +60,7 @@ The parameters preceded by "--" may be modified accordingly such as the number o
 > [!IMPORTANT]
 > A GPU is required to timely train the model.
 
-After the model is finished training, output files will be saved to the `entire_workflow/models` folder.
+After the model is finished training, output files will be saved into `detr/outputs`, and from there, move the model into the `entire_workflow/models` folder.
 
 ### PostgreSQL Docker Container
 1. Run `lsof -i :5432` to see if anything is currently occupying that port.

@@ -24,7 +24,9 @@ import pole_detection
 # Example of how to run script:
 # python3 entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
 # TEST DEMO:
-# '32.7077092,-117.0841702' '32.70771,-117.0832791'
+# '32.7077092,-117.0841702' '32.7077089,-117.08301' USE MIN HEIGHT 375 FOV 110
+# '32.669649,-117.0955079' '32.6675084,-117.0946474'
+# '32.745509,-117.0233657' '32.74552,-117.0248222'
 
 loc1 = sys.argv[1]
 loc2 = sys.argv[2]
@@ -34,24 +36,27 @@ logging.info(f"Second Coordinte Pair: {loc2}")
 
 temp_dir = 'entire_workflow/temp_images'
 temp_bb_dir = 'entire_workflow/temp_bb_images'
-temp_gif_dif = 'entire_workflow/temp_gif_images'
+temp_gif_dir = 'entire_workflow/temp_gif_images'
 
 
 if __name__== "__main__":
+    if os.path.exists(temp_bb_dir):
+        shutil.rmtree(temp_bb_dir)
+    
     if not os.path.exists(temp_dir):
         os.mkdir(temp_dir)
         
     if not os.path.exists(temp_bb_dir):
         os.mkdir(temp_bb_dir)
     
-    if not os.path.exists(temp_gif_dif):
-        os.mkdir(temp_gif_dif)
-    coors = coordinate_traverse.traverse_collect_images(loc1, loc2, temp_dir)
-    
+    if not os.path.exists(temp_gif_dir):
+        os.mkdir(temp_gif_dir)
     logging.info("Collecting Images")
-    coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dif)
-    
-    coordinate_traverse.gif_gen(dir=temp_gif_dif, output_dir = 'static/', filename='sample_traverse',duration = 0.1)
+    coors = coordinate_traverse.traverse_collect_images(loc1, loc2, temp_dir, fov = 110)
+    logging.info("Finished Collecting Images for Detection")
+    coordinate_traverse.traverse_straight(loc1 = loc1, loc2 = loc2, coors=coors, dir=temp_gif_dir)
+    logging.info("Finished Collecting Images for Gif")
+    coordinate_traverse.gif_gen(dir=temp_gif_dir, output_dir = 'static/', filename='sample_traverse',duration = 0.1)
     logging.info("Finished Creating Gif")
 
     logging.info("Finished Collecting Images")

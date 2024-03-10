@@ -88,7 +88,7 @@ def collect_struct_json(jsonpath, outpath):
     get_wooden(outpath, WD)
 # %%
 # sample code :
-collect_struct_json('../data/sunny_structure_coordinates.json','../images/')
+#collect_struct_json('../data/sunny_structure_coordinates.json','../images/')
 
 # %%
 

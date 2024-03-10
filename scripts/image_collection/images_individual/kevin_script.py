@@ -52,7 +52,7 @@ def sign_url(input_url=None, secret=None):
     return original_url + "&signature=" + encoded_signature.decode()
 
 # %%
-def get_image(lat, long, size = '640x400', fov = 90, heading = 0, pitch = 0, show = False, save_path = ''):
+def get_image(lat, long, size = '640x640', fov = 90, heading = 0, pitch = 0, show = False, save_path = ''):
     api_key = os.getenv('API_KEY')
     secret = os.getenv('SECRET')
 

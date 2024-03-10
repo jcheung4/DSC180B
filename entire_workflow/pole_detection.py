@@ -122,15 +122,17 @@ def run_detection(loc1, loc2):
     #checkpoint = torch.load('entire_workflow/models/model_final2.pth',
     #                        map_location='cpu')
     
-    checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
+    #checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
+    #                        map_location='cpu')
+    
+    checkpoint = torch.load('entire_workflow/models/checkpoint.pth',
                             map_location='cpu')
-
     model.load_state_dict(checkpoint['model'],
                         strict=False)
 
-    # Current parameters we used to determine if bounding box is valid (Currently only using area)
+    # Current parameters we used to determine if bounding box is valid (Either Area or Height)
     min_area = 10000
-    min_height = 250
+    min_height = 375
 
     print("Finised Setup Before DB")
     logging.info("Loaded in Model")
@@ -216,38 +218,37 @@ def run_detection(loc1, loc2):
     def run_worflow(my_image, my_model, img_name):
         # mean-std normalize the input image (batch-size: 1)
         img = transform(my_image).unsqueeze(0)
+        
+        img_split = img_name.split('/')[-1].split('_')
+        logging.info(f"Image: {img_split[0]}_{img_split[1]}")
+        
+        latitude = img_split[2]
+        longitude = img_split[3][:-4]
 
         # propagate through the model
         outputs = my_model(img)
 
-        for threshold in [0.4]:
-            probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs,
-                                                                    threshold=threshold)
-            probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled)
+        for threshold in [0.3]:
+            probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs, threshold=threshold)
+            #probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled, threshold=threshold)
             
             if probas_to_keep is not None and bboxes_scaled is not None:
                 for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
                     cl = p.argmax()
-                    img_split = img_name.split('/')[-1].split('_')
                     
-                    latitude = img_split[2]
-                    longitude = img_split[3][:-4]
                     pole_type = finetuned_classes[cl]
                     
                     cur_area = (xmax - xmin) * (ymax - ymin)
-        
                     cur_height = ymax - ymin
-                    
-                    if cur_area > min_area:
-                    #if height > min_height:
-                        #insert_query = f" \
-                        #INSERT INTO mypoles (latitude, longitude, type) VALUES \
-                        #({latitude}, {longitude}, '{pole_type}') \
-                        #"
-                        
+                    logging.info(f"Current Area: {cur_area}")
+                    logging.info(f"Current Height: {cur_height}")
+                    print(cur_height)
+                    #if cur_area > min_area:
+                    if cur_height > min_height:
+                        logging.info("Found a pole!")
                         insert_query = f" \
                         INSERT INTO mypoles (latitude, longitude, type) VALUES \
-                        ({latitude}, {longitude}, 'Wooden') \
+                        ({latitude}, {longitude}, '{pole_type}') \
                         "
                         
                         cur.execute(insert_query)
