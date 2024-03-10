@@ -36,12 +36,22 @@ After downloading `images` folder into the `data` directory, split the data into
 ```
 python scripts/cocosplit.py --having-annotations --multi-class -s 0.8 annotations/combined-everyone.json data/custom/annotations/custom_train.json data/custom/annotations/custom_val.json
 ```
-[Cocosplit Repo](https://github.com/akarazniewicz/cocosplit)
-This will download the model's "base" and split the data into training/validation sets based on the COCO json annotations.
+Train/val split script derived from [Cocosplit Repo](https://github.com/akarazniewicz/cocosplit).
 
 To split the images into its train and validation set, run:
 ```
 python scripts/train-val-split.py
+```
+
+After both of these scripts have been ran, the annotations and training/validation will be saved in:
+```
+├── data/custom/                
+│   ├── annotations
+│       ├── custom_train.json
+│       ├── custom_val.json
+│   ├── train2017
+│   ├── val2017
+│
 ```
 
 ### Train the Model
