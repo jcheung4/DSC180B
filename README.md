@@ -87,5 +87,6 @@ python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 > [!NOTE]
 > Example:
 > ```
-> python entire_workflow/pole_workflow.py '32.8209644,-117.1861909' '32.8195283,-117.1861259'
+> python entire_workflow/pole_workflow.py '32.7077092,-117.0841702' '32.7077089,-117.08301'
 > ```
+Results will be stored in `entire_workflow/results.txt` and images with bounding boxes are stored in `entire_workflow/temp_bb_images`.
