@@ -63,7 +63,7 @@ python detr/main.py \
   --output_dir "entire_workflow/models" \
   --resume "detr/detr-r50_no-class-head.pth" \
   --num_classes 2 \
-  --epochs 10 \
+  --epochs 20 \
   --device cuda
 ```
 The parameters preceded by "--" may be modified accordingly such as the number of epochs to train for.
@@ -90,3 +90,9 @@ python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 > python entire_workflow/pole_workflow.py '32.7077092,-117.0841702' '32.7077089,-117.08301'
 > ```
 Results will be stored in `entire_workflow/results.txt` and images with bounding boxes are stored in `entire_workflow/temp_bb_images`.
+
+## Flask Server
+To open a flask server for interactive demo, run:
+```
+python flask-app.py
+```

@@ -220,7 +220,7 @@ def run_detection(loc1, loc2):
         img = transform(my_image).unsqueeze(0)
         
         img_split = img_name.split('/')[-1].split('_')
-        logging.info(f"Image: {img_split[0]}_{img_split[1]}")
+        #logging.info(f"Image: {img_split[0]}_{img_split[1]}")
         
         latitude = img_split[2]
         longitude = img_split[3][:-4]
@@ -228,9 +228,9 @@ def run_detection(loc1, loc2):
         # propagate through the model
         outputs = my_model(img)
 
-        for threshold in [0.3]:
+        for threshold in [0.5]:
             probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs, threshold=threshold)
-            #probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled, threshold=threshold)
+            probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled, threshold=threshold)
             
             if probas_to_keep is not None and bboxes_scaled is not None:
                 for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
@@ -240,8 +240,8 @@ def run_detection(loc1, loc2):
                     
                     cur_area = (xmax - xmin) * (ymax - ymin)
                     cur_height = ymax - ymin
-                    logging.info(f"Current Area: {cur_area}")
-                    logging.info(f"Current Height: {cur_height}")
+                    #logging.info(f"Current Area: {cur_area}")
+                    #logging.info(f"Current Height: {cur_height}")
                     print(cur_height)
                     #if cur_area > min_area:
                     if cur_height > min_height:
