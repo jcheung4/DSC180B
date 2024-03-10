@@ -84,7 +84,8 @@ In order to run the model to identify wooden and metal poles along the streets o
 ```
 python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 ```
-> [!Example]
+> [!NOTE]
+> Example:
 > ```
 > python entire_workflow/pole_workflow.py '32.7077092,-117.0841702' '32.7077089,-117.08301'
 > ```
