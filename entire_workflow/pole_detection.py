@@ -199,7 +199,7 @@ def run_detection(loc1, loc2):
                 areaO = overlappingArea(box1,box2)
                 if (areaO/area1)>threshold or (areaO/area2)>threshold:
                     p1 = prob[i]
-                    p2 = prob[2]
+                    p2 = prob[j]
 
                     if p1.max()<p2.max():
                         removed += [i]

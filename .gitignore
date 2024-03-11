@@ -13,3 +13,4 @@ sample-log.txt
 data/images/*
 data/custom/train2017/*
 data/custom/val2017/*
+*.gif
