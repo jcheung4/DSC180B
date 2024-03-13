@@ -15,6 +15,8 @@ def run_detection(loc1, loc2):
     
     import torch, torchvision
     print(torch.__version__, torch.cuda.is_available())
+
+    cuda_status = torch.cuda.is_available()
     torch.set_grad_enabled(False)
 
     import torchvision.transforms as T
@@ -38,6 +40,22 @@ def run_detection(loc1, loc2):
     import glob
 
     import re
+    import sys, os, distutils.core
+    sys.path.insert(0, os.path.abspath('entire_workflow/detectron2'))
+    sys.path.insert(0, os.path.abspath('entire_workflow/detr'))
+    dist = distutils.core.run_setup("entire_workflow/detectron2/setup.py")
+    import detectron2
+
+    # import some common libraries
+    import numpy as np
+    import os, json, cv2, random
+
+    # import some common detectron2 utilities
+    from detectron2.engine import DefaultPredictor
+    from detectron2.config import get_cfg
+    from detectron2.utils.visualizer import Visualizer
+    from detectron2.data import MetadataCatalog, DatasetCatalog, Metadata
+    from d2.detr import add_detr_config
     
     # To sort images because it was doing left0, left1, left10, instead of left0, left1, left2
     def natural_sort_key(s):
@@ -78,6 +96,20 @@ def run_detection(loc1, loc2):
         bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], im.size)
 
         return probas_to_keep, bboxes_scaled
+    
+    def filter_predictions_from_outputs(outputs,
+                                    threshold=0.4):
+
+        predictions = outputs["instances"].to("cpu")
+
+        indices = [i
+                for (i, s) in enumerate(predictions.scores)
+                if s >= threshold
+                ]
+
+        filtered_predictions = predictions[indices]
+
+        return filtered_predictions
 
     def plot_finetuned_results(pil_img, prob=None, boxes=None, img_name=None):
         plt.figure(figsize=(16,10))
@@ -89,7 +121,7 @@ def run_detection(loc1, loc2):
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                             fill=False, color=c, linewidth=3))
                 cl = p.argmax()
-                text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
+                text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}, {(ymax - ymin):0.2f}'
                 ax.text(xmin, ymin, text, fontsize=15,
                         bbox=dict(facecolor='yellow', alpha=0.5))
             plt.axis('off')
@@ -112,27 +144,39 @@ def run_detection(loc1, loc2):
     # Parameters for Model
     num_classes = 2
     finetuned_classes = ['Metal', 'Wooden']
-
     # Loading Fine Tuned Model
-    model = torch.hub.load('facebookresearch/detr',
-                        'detr_resnet50',
-                        pretrained=False,
-                        num_classes=num_classes)
+    if cuda_status == False:
+        model = torch.hub.load('facebookresearch/detr',
+                            'detr_resnet50',
+                            pretrained=False,
+                            num_classes=num_classes)
 
-    #checkpoint = torch.load('entire_workflow/models/model_final2.pth',
-    #                        map_location='cpu')
-    
-    #checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
-    #                        map_location='cpu')
-    
-    checkpoint = torch.load('entire_workflow/models/checkpoint.pth',
-                            map_location='cpu')
-    model.load_state_dict(checkpoint['model'],
-                        strict=False)
+        #checkpoint = torch.load('entire_workflow/models/model_final2.pth',
+        #                        map_location='cpu')
+        
+        #checkpoint = torch.load('entire_workflow/models/checkpoint_Q1.pth',
+        #                        map_location='cpu')
+        
+        checkpoint = torch.load('entire_workflow/models/checkpoint.pth',
+                                map_location='cpu')
+        model.load_state_dict(checkpoint['model'],
+                            strict=False)
+    else:
+        cfg = get_cfg()
 
+        add_detr_config(cfg)
+        cfg.merge_from_file("entire_workflow/detr/d2/configs/detr_256_6_6_torchvision.yaml")
+
+        cfg.OUTPUT_DIR = 'entire_workflow/models/'
+
+        cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+        cfg.MODEL.DETR.NUM_CLASSES = 2
+        gpu_classes = ['Wooden','Metal']
+        custom_metadata = Metadata().set(evaluator = 'coco',thing_classes=gpu_classes)
+        model = DefaultPredictor(cfg)
     # Current parameters we used to determine if bounding box is valid (Either Area or Height)
     min_area = 10000
-    min_height = 375
+    min_height = 300
 
     print("Finised Setup Before DB")
     logging.info("Loaded in Model")
@@ -214,51 +258,149 @@ def run_detection(loc1, loc2):
                 out_prob += [prob[i]]
                 out_bbox += [bbox[i]]
         return out_prob,out_bbox
+    
+    def filterOverlappingBoxPred(predictions, threshold = 0.3):
+        bbox = list(predictions.pred_boxes)
+        prob = predictions.scores
+        def isOverlapping2D(box1, box2):
+            def isOverlapping1D(xmin1, xmax1,xmin2, xmax2):
+                return xmin1 <= xmax2 and xmin2 <= xmax1
+            xmin1, ymin1, xmax1, ymax1 = box1
+            xmin2, ymin2, xmax2, ymax2 = box2
 
-    def run_worflow(my_image, my_model, img_name):
-        # mean-std normalize the input image (batch-size: 1)
-        img = transform(my_image).unsqueeze(0)
-        
-        img_split = img_name.split('/')[-1].split('_')
-        #logging.info(f"Image: {img_split[0]}_{img_split[1]}")
-        
-        latitude = img_split[2]
-        longitude = img_split[3][:-4]
+            return isOverlapping1D(xmin1, xmax1,xmin2, xmax2) and isOverlapping1D(ymin1, ymax1,ymin2, ymax2)
 
-        # propagate through the model
-        outputs = my_model(img)
+        def overlappingArea(box1,box2):
+            def overlappingLine(xmin1, xmax1,xmin2, xmax2):
+                return min(xmax1, xmax2) - max(xmin1,xmin2)
+            xmin1, ymin1, xmax1, ymax1 = box1
+            xmin2, ymin2, xmax2, ymax2 = box2
+            return overlappingLine(xmin1, xmax1,xmin2, xmax2)*overlappingLine(ymin1, ymax1,ymin2, ymax2)
 
-        for threshold in [0.5]:
-            probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs, threshold=threshold)
-            probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled, threshold=threshold)
+        def boxArea(box):
+            xmin, ymin, xmax, ymax = box
+            return (xmax-xmin)*(ymax-ymin)
+
+        i=0
+        j=1
+        removed =[]
+        while(i<len(bbox)-1):
+            if i in removed or j>= len(bbox):
+                i += 1
+                j = i+1
+                continue
+            if j in removed:
+                j +=1
+                continue
+            box1 = bbox[i]
+            box2 = bbox[j]
+            if isOverlapping2D(box1, box2):
+                area1 = boxArea(box1)
+                area2 = boxArea(box2)
+                areaO = overlappingArea(box1,box2)
+                if (areaO/area1)>threshold or (areaO/area2)>threshold:
+                    
+                    p1 = prob[i]
+                    p2 = prob[j]
+
+                    if p1<p2:
+                        removed += [i]
+                    else:
+                        removed += [j]    
+            j+=1
+
+        out=[]
+        for i in range(len(bbox)):
+            if i not in removed:
+                out += [i]
+        return predictions[out]
+
+    def run_worflow(my_image, my_model, img_name, threshold = 0.4):
+        if cuda_status == False:
+            # mean-std normalize the input image (batch-size: 1)
+            img = transform(my_image).unsqueeze(0)
             
-            if probas_to_keep is not None and bboxes_scaled is not None:
-                for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
-                    cl = p.argmax()
-                    
-                    pole_type = finetuned_classes[cl]
-                    
-                    cur_area = (xmax - xmin) * (ymax - ymin)
-                    cur_height = ymax - ymin
-                    #logging.info(f"Current Area: {cur_area}")
-                    #logging.info(f"Current Height: {cur_height}")
-                    print(cur_height)
-                    #if cur_area > min_area:
-                    if cur_height > min_height:
-                        logging.info("Found a pole!")
-                        insert_query = f" \
-                        INSERT INTO mypoles (latitude, longitude, type) VALUES \
-                        ({latitude}, {longitude}, '{pole_type}') \
-                        "
-                        
-                        cur.execute(insert_query)
-                        
-                        print(True)
+            img_split = img_name.split('/')[-1].split('_')
+            #logging.info(f"Image: {img_split[0]}_{img_split[1]}")
+            
+            latitude = img_split[2]
+            longitude = img_split[3][:-4]
 
-            plot_finetuned_results(my_image,
-                                probas_to_keep,
-                                bboxes_scaled,
-                                img_name)
+            # propagate through the model
+            outputs = my_model(img)
+
+            for threshold in [0.5]:
+                probas_to_keep, bboxes_scaled = filter_bboxes_from_outputs(outputs, threshold=threshold)
+                probas_to_keep, bboxes_scaled = filterOverlappingBox(probas_to_keep, bboxes_scaled, threshold=threshold)
+                
+                if probas_to_keep is not None and bboxes_scaled is not None:
+                    for p, (xmin, ymin, xmax, ymax)in zip(probas_to_keep, bboxes_scaled):
+                        cl = p.argmax()
+                        
+                        pole_type = finetuned_classes[cl]
+                        
+                        cur_area = (xmax - xmin) * (ymax - ymin)
+                        cur_height = ymax - ymin
+                        #logging.info(f"Current Area: {cur_area}")
+                        #logging.info(f"Current Height: {cur_height}")
+                        print(cur_height)
+                        #if cur_area > min_area:
+                        if cur_height > min_height:
+                            logging.info("Found a pole!")
+                            insert_query = f" \
+                            INSERT INTO mypoles (latitude, longitude, type) VALUES \
+                            ({latitude}, {longitude}, '{pole_type}') \
+                            "
+                            
+                            cur.execute(insert_query)
+                            
+                        else:
+                            print("Detection is too small to be considered reliable")
+
+                plot_finetuned_results(my_image,
+                                    probas_to_keep,
+                                    bboxes_scaled,
+                                    img_name)
+        else:
+            outputs = my_model(my_image)
+
+            filtered_predictions = filter_predictions_from_outputs(outputs,
+                                                                threshold=threshold)
+            filtered_predictions = filterOverlappingBoxPred(filtered_predictions)
+
+            # We can use `Visualizer` to draw the predictions on the image.
+            for cl, (xmin, ymin, xmax, ymax) in zip(filtered_predictions.pred_classes,list(filtered_predictions.pred_boxes)):
+                
+                pole_type = gpu_classes[cl]
+                
+                cur_area = (xmax - xmin) * (ymax - ymin)
+                cur_height = ymax - ymin
+                #logging.info(f"Current Area: {cur_area}")
+                #logging.info(f"Current Height: {cur_height}")
+                print(cur_height)
+                #if cur_area > min_area:
+                if cur_height > min_height:
+                    logging.info("Found a pole!")
+                    insert_query = f" \
+                    INSERT INTO mypoles (latitude, longitude, type) VALUES \
+                    ({latitude}, {longitude}, '{pole_type}') \
+                    "
+                    
+                    cur.execute(insert_query)
+                    
+                else: 
+                    print("Detection is too small to be considered reliable")
+            v = Visualizer(my_image[:, :, ::-1],
+                            custom_metadata,
+                            scale=1.2)
+            out = v.draw_instance_predictions(filtered_predictions)
+            img_name_lst = img_name.split('/')[-1].split('_')
+            img_name_final = f"{img_name_lst[0]}_{img_name_lst[1]}.jpg"
+            print(img_name_final)
+            
+            save_path = os.path.join('entire_workflow/temp_bb_images', img_name_final)
+            print(save_path)
+            cv2.imwrite(save_path,out.get_image()[:, :, ::-1])
         
     image_paths = glob.glob('entire_workflow/temp_images/*.jpg')
     left_images = []
@@ -274,13 +416,19 @@ def run_detection(loc1, loc2):
     right_images = sorted(right_images, key=natural_sort_key)
 
     for image in left_images:
-        print(image)    
-        im = Image.open(image)
+        print(image)   
+        if cuda_status:
+            im = cv2.imread(image)
+        else:
+            im = Image.open(image)
         run_worflow(im, model, image)
         
     for image in right_images:
         print(image)    
-        im = Image.open(image)
+        if cuda_status:
+            im = cv2.imread(image)
+        else:
+            im = Image.open(image)
 
         run_worflow(im, model, image)
 
