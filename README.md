@@ -72,6 +72,9 @@ The parameters preceded by "--" may be modified accordingly such as the number o
 
 After the model is finished training, output files will be saved into `detr/outputs`, and from there, move the model into the `entire_workflow/models` folder.
 
+### DETR2
+If you are willing to train DETR2 model manually, go to scripts/model_dev and refer to detr2_finetuning.ipynb.
+
 ### PostgreSQL Docker Container
 1. Run `lsof -i :5432` to see if anything is currently occupying that port.
     - If so, run `sudo kill [pid]` to get rid of it.
@@ -84,6 +87,10 @@ In order to run the model to identify wooden and metal poles along the streets o
 ```
 python entire_workflow/pole_workflow.py [coordinate pair 1] [coordinate pair 2]
 ```
+
+> [!IMPORTANT]
+> Depending on your GPU and CUDA availability, the pipeline will use 2 different models. If your device has accessible GPU and CUDA set up, please run set up codes in entire_workflow/setup.ipynb.
+
 > [!NOTE]
 > Example:
 > ```
