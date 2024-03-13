@@ -121,7 +121,7 @@ def run_detection(loc1, loc2):
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                             fill=False, color=c, linewidth=3))
                 cl = p.argmax()
-                text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}'
+                text = f'{finetuned_classes[cl]}: {p[cl]:0.2f}, {(ymax - ymin):0.2f}'
                 ax.text(xmin, ymin, text, fontsize=15,
                         bbox=dict(facecolor='yellow', alpha=0.5))
             plt.axis('off')
@@ -176,7 +176,7 @@ def run_detection(loc1, loc2):
         model = DefaultPredictor(cfg)
     # Current parameters we used to determine if bounding box is valid (Either Area or Height)
     min_area = 10000
-    min_height = 375
+    min_height = 300
 
     print("Finised Setup Before DB")
     logging.info("Loaded in Model")
@@ -354,7 +354,8 @@ def run_detection(loc1, loc2):
                             
                             cur.execute(insert_query)
                             
-                            print(True)
+                        else:
+                            print("Detection is too small to be considered reliable")
 
                 plot_finetuned_results(my_image,
                                     probas_to_keep,
@@ -387,13 +388,14 @@ def run_detection(loc1, loc2):
                     
                     cur.execute(insert_query)
                     
-                    print(True)
+                else: 
+                    print("Detection is too small to be considered reliable")
             v = Visualizer(my_image[:, :, ::-1],
                             custom_metadata,
                             scale=1.2)
             out = v.draw_instance_predictions(filtered_predictions)
             img_name_lst = img_name.split('/')[-1].split('_')
-            img_name_final = f"{img_name_lst[0]}_{img_name_lst[1]}"
+            img_name_final = f"{img_name_lst[0]}_{img_name_lst[1]}.jpg"
             print(img_name_final)
             
             save_path = os.path.join('entire_workflow/temp_bb_images', img_name_final)
